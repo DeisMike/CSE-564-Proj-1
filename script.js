@@ -87,8 +87,29 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
             .call(d3.axisBottom(xScale))
             .selectAll("text")
             .attr("transform", "rotate(0)")
-            .attr("translate", "500px")
             .style("text-anchor", "end");
+
+        // Add Y-axis
+        svg.append("g")
+            .attr("transform", `translate(${margin.left}, 0)`)
+            .call(d3.axisLeft(yScale));
+
+        // Add X-axis Label
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", height - 10)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text(selectedVar);
+
+        // Add Y-axis Label
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height / 2)
+            .attr("y", 15)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text("Count");
     }
 
     function drawHistogram(selectedVar) {
