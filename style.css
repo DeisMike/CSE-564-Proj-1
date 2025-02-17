@@ -35,3 +35,8 @@ h1 {
 .tick text {
     font-size: 12px;
 }
+
+/* Ensure axis labels are not cut off */
+svg {
+    overflow: visible;
+}
