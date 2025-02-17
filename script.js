@@ -43,10 +43,21 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
         xAxisVar = this.value;
         updateScatterplot();
     });
-    d3.select("#yAxisSelect").on("change", function () {
-        yAxisVar = this.value;
-        updateScatterplot();
-    });
+
+    //#region yAxisSelect
+    d3.select("#yAxisSelect")
+        .selectAll("option")
+        .data(variables)
+        .enter()
+        .append("option")
+        .text(d => d)
+        .attr("value", d => d);
+    d3.select("#yAxisSelect")
+        .on("change", function () {
+            yAxisVar = this.value;
+            updateChart(yAxisVar);
+        });
+    //#endregion
 
     function updateChart(selectedVar) {
         svg.selectAll("*").remove();
@@ -154,6 +165,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
             .attr("fill", "red");
     }
 
+    //Update chart on variable selection change
     d3.select("#variableSelect").on("change", function () {
         updateChart(this.value);
     });
