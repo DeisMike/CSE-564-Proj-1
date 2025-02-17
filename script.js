@@ -91,10 +91,10 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
         svg.selectAll("rect")
             .data(data)
             .enter().append("rect")
-            .attr("x", d => xScale(d.key))
-            .attr("y", d => yScale(d.value))
+            .attr("x", d => xScale(d[selectedXVar]))
+            .attr("y", d => yScale(d[selectedYVar]))
             .attr("width", xScale.bandwidth())
-            .attr("height", d => height - margin.bottom - yScale(d.value))
+            .attr("height", d => height - margin.bottom - yScale(d[selectedYVar]))
             .attr("fill", "steelblue");
 
         // Add X-axis
