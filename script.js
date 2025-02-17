@@ -76,25 +76,34 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
     function drawBarChart(selectedXVar, selectedYVar) {
         svg.selectAll("*").remove(); // Clear previous chart
 
+        // Filter data and compute statistics
+        const groupedData = d3.group(data, d => d[selectedXVar]);
+        const processedData = Array.from(groupedData, ([key, values]) => {
+            return {
+                key: key,
+                median: d3.median(values, d => d[selectedYVar]), // Median value
+                max: d3.max(values, d => d[selectedYVar]) // Max value for scaling
+            };
+        });
+
         // Scales
         const xScale = d3.scaleBand()
-            .domain(data.map(d => d[selectedXVar]))
+            .domain(processedData.map(d => d.key))
             .range([margin.left, width - margin.right])
             .padding(0.1);
 
         const yScale = d3.scaleLinear()
-            .domain([0, d3.max(data, d => d[selectedYVar])])
-            .nice()
+            .domain([0, d3.max(processedData, d => d.max)]) // Scale based on max
             .range([height - margin.bottom, margin.top]);
 
         // Draw bars
         svg.selectAll("rect")
-            .data(data)
+            .data(processedData)
             .enter().append("rect")
-            .attr("x", d => xScale(d[selectedXVar]))
-            .attr("y", d => yScale(d[selectedYVar]))
+            .attr("x", d => xScale(d.key))
+            .attr("y", d => yScale(d.median))  // Scale the median for placement
             .attr("width", xScale.bandwidth())
-            .attr("height", d => height - margin.bottom - yScale(d[selectedYVar]))
+            .attr("height", d => height - margin.bottom - yScale(d.median))
             .attr("fill", "steelblue");
 
         // Add X-axis
@@ -107,7 +116,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
 
         // Add Y-axis
         svg.append("g")
-            .attr("transform", `translate(${margin.left}, 0)`)
+            .attr("transform", `translate(${margin.left + 20}, 0)`)
             .call(d3.axisLeft(yScale));
 
         // Add X-axis Label
