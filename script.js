@@ -59,13 +59,13 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
         });
     //#endregion
 
-    function updateChart(selectedVar) {
+    function updateChart(selectedXVar, selectedYVar) {
         svg.selectAll("*").remove();
 
-        if (isCategorical(selectedVar)) {
-            drawBarChart(selectedVar);
+        if (isCategorical(selectedXVar)) {
+            drawBarChart(selectedXVar, selectedYVar);
         } else {
-            drawHistogram(selectedVar);
+            drawHistogram(selectedXVar);
         }
     }
 
@@ -73,23 +73,28 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
         return variable.includes("county_fips") || variable.includes("state_po");
     }
 
-    function drawBarChart(selectedVar) {
-        const counts = d3.rollup(data, v => v.length, d => d[selectedVar]);
+    function drawBarChart(selectedXVar, selectedYVar) {
+        svg.selectAll("*").remove(); // Clear previous chart
+
+        // Scales
         const xScale = d3.scaleBand()
-            .domain([...counts.keys()])
+            .domain(data.map(d => d[selectedXVar]))
             .range([margin.left, width - margin.right])
             .padding(0.1);
+
         const yScale = d3.scaleLinear()
-            .domain([0, d3.max(counts.values())])
+            .domain([0, d3.max(data, d => d[selectedYVar])])
+            .nice()
             .range([height - margin.bottom, margin.top]);
 
+        // Draw bars
         svg.selectAll("rect")
-            .data(counts)
+            .data(data)
             .enter().append("rect")
-            .attr("x", d => xScale(d[0]))
-            .attr("y", d => yScale(d[1]))
+            .attr("x", d => xScale(d.key))
+            .attr("y", d => yScale(d.value))
             .attr("width", xScale.bandwidth())
-            .attr("height", d => height - margin.bottom - yScale(d[1]))
+            .attr("height", d => height - margin.bottom - yScale(d.value))
             .attr("fill", "steelblue");
 
         // Add X-axis
@@ -111,7 +116,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
             .attr("y", height - 10)
             .attr("text-anchor", "middle")
             .style("font-size", "14px")
-            .text(selectedVar);
+            .text(selectedXVar);
 
         // Add Y-axis Label
         svg.append("text")
@@ -120,7 +125,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
             .attr("y", 15)
             .attr("text-anchor", "middle")
             .style("font-size", "14px")
-            .text("Count");
+            .text("selectedYVar");
     }
 
     function drawHistogram(selectedVar) {
@@ -170,6 +175,6 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
         updateChart(this.value);
     });
 
-    updateChart("state_po");
+    updateChart("state_po", "Median_Household_Income_2022");
 
 });
