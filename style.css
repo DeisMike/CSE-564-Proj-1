@@ -1,17 +1,37 @@
-/* style.css */
 body {
     font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+h1 {
     text-align: center;
 }
 
 #chart {
-    margin: auto;
-    width: 80%;
-    height: 500px;
-    border: 1px solid black;
+    margin-top: 20px;
 }
 
-select, button {
-    margin: 10px;
-    padding: 5px;
+.bar {
+    fill: steelblue;
+}
+
+.bar:hover {
+    fill: orange;
+}
+
+.axis-label {
+    font-size: 12px;
+}
+
+.axis-title {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.tick line {
+    stroke: #ccc;
+}
+
+.tick text {
+    font-size: 12px;
 }
