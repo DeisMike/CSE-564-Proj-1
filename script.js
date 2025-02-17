@@ -87,7 +87,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
             .call(d3.axisBottom(xScale))
             .selectAll("text")
             .attr("transform", "rotate(0)")
-            .attr("translate", "200px")
+            .attr("translate", "500px")
             .style("text-anchor", "end");
     }
 
