@@ -37,8 +37,8 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
     });
 
     // Create radio buttons for scatterplot axis selection
-    let xAxisVar = "Employed_2020";
-    let yAxisVar = "Unemployment_rate_2020";
+    let xAxisVar = "state_po";
+    let yAxisVar = "Median_Household_Income_2022";
     d3.select("#xAxisSelect").on("change", function () {
         xAxisVar = this.value;
         updateScatterplot();
@@ -55,7 +55,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
     d3.select("#yAxisSelect")
         .on("change", function () {
             yAxisVar = this.value;
-            updateChart(yAxisVar);
+            updateChart(xAxisVar, yAxisVar);
         });
     //#endregion
 
@@ -125,7 +125,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
             .attr("y", 15)
             .attr("text-anchor", "middle")
             .style("font-size", "14px")
-            .text("selectedYVar");
+            .text(selectedYVar);
     }
 
     function drawHistogram(selectedVar) {
@@ -172,7 +172,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function (data) {
 
     //Update chart on variable selection change
     d3.select("#variableSelect").on("change", function () {
-        updateChart(this.value);
+        updateChart(this.value, yAxisVar);
     });
 
     updateChart("state_po", "Median_Household_Income_2022");
