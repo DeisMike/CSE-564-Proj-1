@@ -3,26 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D3 Visualization</title>
+    <title>D3.js Assignment 1</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-    <h1>D3 Visualization of County Data</h1>
-    <label for="variableSelect">Select a Variable:</label>
-    <select id="variableSelect"></select>
-    
-    <button id="toggleOrientation">Toggle Orientation</button>
-    
+    <h1>US County Data Visualization</h1>
     <div>
-        <label for="xAxisSelect">X-Axis Variable:</label>
-        <select id="xAxisSelect"></select>
+        <label for="variable-select">Select Variable:</label>
+        <select id="variable-select">
+            <option value="state_po">State ID Code</option>
+            <option value="Civilian_labor_force_2020">Civilian Labor Force 2020</option>
+            <option value="Unemployment_rate_2020">Unemployment Rate 2020</option>
+            <option value="Median_Household_Income_2022">Median Household Income 2022</option>
+            <option value="CENSUS_2020_POP">Census 2020 Population</option>
+        </select>
     </div>
     <div>
-        <label for="yAxisSelect">Y-Axis Variable:</label>
-        <select id="yAxisSelect"></select>
+        <label for="orientation-toggle">Toggle Orientation:</label>
+        <button id="orientation-toggle">Toggle Orientation</button>
     </div>
-    
+    <div>
+        <label>Scatterplot Axis Selection:</label>
+        <input type="radio" id="x-axis" name="axis" value="x" checked>
+        <label for="x-axis">X-axis</label>
+        <input type="radio" id="y-axis" name="axis" value="y">
+        <label for="y-axis">Y-axis</label>
+    </div>
     <div id="chart"></div>
     <script src="script.js"></script>
 </body>
