@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3 Visualization</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <h1>D3 Visualization of County Data</h1>
+    <label for="variableSelect">Select a Variable:</label>
+    <select id="variableSelect"></select>
+    
+    <button id="toggleOrientation">Toggle Orientation</button>
+    
+    <div>
+        <label for="xAxisSelect">X-Axis Variable:</label>
+        <select id="xAxisSelect"></select>
+    </div>
+    <div>
+        <label for="yAxisSelect">Y-Axis Variable:</label>
+        <select id="yAxisSelect"></select>
+    </div>
+    
+    <div id="chart"></div>
+    <script src="script.js"></script>
+</body>
+</html>
