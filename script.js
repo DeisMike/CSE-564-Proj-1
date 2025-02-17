@@ -11,7 +11,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function(data) {
     // Set dimensions
     const width = 800;
     const height = 500;
-    const margin = {top: 20, right: 30, bottom: 50, left: 50};
+    const margin = {top: 50, right: 30, bottom: 50, left: 70};
     
     // Create SVG container
     const svg = d3.select("#chart")
@@ -19,8 +19,8 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function(data) {
         .attr("width", width)
         .attr("height", height);
     
-    // Create pulldown menu
-    const variables = Object.keys(data[0]).filter(d => d !== "county_fips");
+    // Create dropdown menu
+    const variables = Object.keys(data[0]).filter(d => d !== "county_fips" && d !== "state_po");
     d3.select("#variableSelect")
         .selectAll("option")
         .data(variables)
@@ -37,16 +37,21 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function(data) {
     });
     
     // Create radio buttons for scatterplot axis selection
-    let xAxisVar = "Employed_2020";
-    let yAxisVar = "Unemployment_rate_2020";
-    d3.select("#xAxisSelect").on("change", function() {
-        xAxisVar = this.value;
-        updateScatterplot();
-    });
-    d3.select("#yAxisSelect").on("change", function() {
-        yAxisVar = this.value;
-        updateScatterplot();
-    });
+    d3.select("#xAxisSelect")
+        .selectAll("option")
+        .data(variables)
+        .enter()
+        .append("option")
+        .text(d => d)
+        .attr("value", d => d);
+    
+    d3.select("#yAxisSelect")
+        .selectAll("option")
+        .data(variables)
+        .enter()
+        .append("option")
+        .text(d => d)
+        .attr("value", d => d);
     
     function updateChart(selectedVar) {
         svg.selectAll("*").remove();
@@ -66,23 +71,29 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function(data) {
         const counts = d3.rollup(data, v => v.length, d => d[selectedVar]);
         const xScale = d3.scaleBand()
             .domain([...counts.keys()])
-            .range([margin.left, width - margin.right])
+            .range(isUpright ? [margin.left, width - margin.right] : [margin.top, height - margin.bottom])
             .padding(0.1);
         const yScale = d3.scaleLinear()
             .domain([0, d3.max(counts.values())])
-            .range([height - margin.bottom, margin.top]);
+            .range(isUpright ? [height - margin.bottom, margin.top] : [width - margin.right, margin.left]);
         
         svg.selectAll("rect")
             .data(counts)
             .enter().append("rect")
-            .attr("x", d => xScale(d[0]))
-            .attr("y", height - margin.bottom)
-            .attr("width", xScale.bandwidth())
-            .attr("height", 0)
-            .attr("fill", "steelblue")
-            .transition().duration(1000)
-            .attr("y", d => yScale(d[1]))
-            .attr("height", d => height - margin.bottom - yScale(d[1]));
+            .transition().duration(500)
+            .attr(isUpright ? "x" : "y", d => xScale(d[0]))
+            .attr(isUpright ? "y" : "x", d => yScale(d[1]))
+            .attr(isUpright ? "width" : "height", xScale.bandwidth())
+            .attr(isUpright ? "height" : "width", d => height - margin.bottom - yScale(d[1]))
+            .attr("fill", "steelblue");
+        
+        // Add labels
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", margin.top / 2)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .text("Bar Chart: " + selectedVar);
     }
     
     function drawHistogram(selectedVar) {
@@ -102,34 +113,20 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function(data) {
         svg.selectAll("rect")
             .data(bins)
             .enter().append("rect")
+            .transition().duration(500)
             .attr("x", d => xScale(d.x0))
-            .attr("y", height - margin.bottom)
-            .attr("width", d => xScale(d.x1) - xScale(d.x0) - 1)
-            .attr("height", 0)
-            .attr("fill", "steelblue")
-            .transition().duration(1000)
             .attr("y", d => yScale(d.length))
-            .attr("height", d => height - margin.bottom - yScale(d.length));
-    }
-    
-    function updateScatterplot() {
-        svg.selectAll("*").remove();
-        const xScale = d3.scaleLinear()
-            .domain(d3.extent(data, d => d[xAxisVar]))
-            .range([margin.left, width - margin.right]);
-        const yScale = d3.scaleLinear()
-            .domain(d3.extent(data, d => d[yAxisVar]))
-            .range([height - margin.bottom, margin.top]);
+            .attr("width", d => xScale(d.x1) - xScale(d.x0) - 1)
+            .attr("height", d => height - margin.bottom - yScale(d.length))
+            .attr("fill", "steelblue");
         
-        svg.selectAll("circle")
-            .data(data)
-            .enter().append("circle")
-            .attr("cx", d => xScale(d[xAxisVar]))
-            .attr("cy", height - margin.bottom)
-            .attr("r", 5)
-            .attr("fill", "red")
-            .transition().duration(1000)
-            .attr("cy", d => yScale(d[yAxisVar]));
+        // Add labels
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", margin.top / 2)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .text("Histogram: " + selectedVar);
     }
     
     d3.select("#variableSelect").on("change", function() {
@@ -137,5 +134,4 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(function(data) {
     });
     
     updateChart("Employed_2020");
-    updateScatterplot();
 });
