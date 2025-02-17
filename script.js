@@ -13,6 +13,8 @@ const svg = d3.select("#chart")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
 let orientation = "upright";
+let scatterXVariable = null;
+let scatterYVariable = null;
 
 // Variables that should use a logarithmic scale due to high skewness
 const logScaleVariables = [
@@ -32,6 +34,11 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
 
     variableSelect.on("change", function() {
         selectedVariable = this.value;
+        if (axisSelection.property("value") === "x") {
+            scatterXVariable = selectedVariable;
+        } else {
+            scatterYVariable = selectedVariable;
+        }
         updateChart();
     });
 
@@ -41,7 +48,10 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
     });
 
     axisSelection.on("change", function() {
-        // Do not update scatterplot here; wait for variable selection
+        // Update scatterplot only if both x and y variables are selected
+        if (scatterXVariable && scatterYVariable) {
+            updateScatterplot();
+        }
     });
 
     function updateChart() {
@@ -80,7 +90,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         svg.append("g")
             .call(yAxis);
 
-        svg.selectAll(".bar")
+        const bars = svg.selectAll(".bar")
             .data(states)
             .enter()
             .append("rect")
@@ -97,15 +107,14 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .attr("x", innerWidth / 2)
             .attr("y", innerHeight + margin.bottom - 10)
             .style("text-anchor", "middle")
-            .text("State ID Code");
+            .text(orientation === "upright" ? "State ID Code" : "Number of Counties");
 
         svg.append("text")
             .attr("class", "axis-title")
-            .attr("transform", `rotate(-90)`)
-            .attr("x", -innerHeight / 2)
-            .attr("y", -margin.left + 20)
+            .attr("transform", orientation === "upright" ? `translate(${-margin.left + 20},${innerHeight / 2}) rotate(-90)` : 
+                `translate(${innerWidth / 2},${innerHeight + margin.bottom - 10})`)
             .style("text-anchor", "middle")
-            .text("Number of Counties");
+            .text(orientation === "upright" ? "Number of Counties" : "State ID Code");
     }
 
     function drawHistogram(data, useLogScale) {
@@ -132,7 +141,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         svg.append("g")
             .call(yAxis);
 
-        svg.selectAll(".bar")
+        const bars = svg.selectAll(".bar")
             .data(bins)
             .enter()
             .append("rect")
@@ -153,19 +162,18 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
 
         svg.append("text")
             .attr("class", "axis-title")
-            .attr("transform", `rotate(-90)`)
-            .attr("x", -innerHeight / 2)
-            .attr("y", -margin.left + 20)
+            .attr("transform", orientation === "upright" ? `translate(${-margin.left + 
+                20},${innerHeight / 2}) rotate(-90)` : `translate(${innerWidth / 2},${innerHeight + margin.bottom - 10})`)
             .style("text-anchor", "middle")
             .text(useLogScale ? "Frequency (log scale)" : "Frequency");
     }
 
     function updateScatterplot() {
-        const xVariable = axisSelection.property("value") === "x" ? selectedVariable : "Civilian_labor_force_2020";
-        const yVariable = axisSelection.property("value") === "y" ? selectedVariable : "Unemployment_rate_2020";
+        if (!scatterXVariable || !scatterYVariable) return;
 
-        const xValues = data.map(d => +d[xVariable]).filter(d => !isNaN(d));
-        const yValues = data.map(d => +d[yVariable]).filter(d => !isNaN(d));
+
+        const xValues = data.map(d => +d[scatterXVariable]).filter(d => !isNaN(d));
+        const yValues = data.map(d => +d[scatterYVariable]).filter(d => !isNaN(d));
 
         const xScale = d3.scaleLinear()
             .domain([d3.min(xValues), d3.max(xValues)])
@@ -189,25 +197,25 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .enter()
             .append("circle")
             .attr("class", "dot")
-            .attr("cx", d => xScale(+d[xVariable]))
-            .attr("cy", d => yScale(+d[yVariable]))
+            .attr("cx", d => xScale(+d[scatterXVariable]))
+            .attr("cy", d => yScale(+d[scatterYVariable]))
             .attr("r", 5)
-            .style("fill", "steelblue");
+            .style("fill", "steelblue")
+            .transition()
+            .duration(500);
 
         svg.append("text")
             .attr("class", "axis-title")
             .attr("x", innerWidth / 2)
-            .attr("y", innerHeight + margin.bottom)
+            .attr("y", innerHeight + margin.bottom - 10)
             .style("text-anchor", "middle")
-            .text(xVariable);
+            .text(scatterXVariable);
 
         svg.append("text")
             .attr("class", "axis-title")
-            .attr("transform", `rotate(-90)`)
-            .attr("x", -innerHeight / 2)
-            .attr("y", -margin.left)
+            .attr("transform", `translate(${-margin.left + 20},${innerHeight / 2}) rotate(-90)`)
             .style("text-anchor", "middle")
-            .text(yVariable);
+            .text(scatterYVariable);
     }
 
     updateChart();
