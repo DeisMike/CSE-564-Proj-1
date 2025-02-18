@@ -23,10 +23,10 @@ const stateAbbreviation = {
 
 // Variables that should use a logarithmic scale due to high skewness
 const logScaleVariables = [
-    "Civilian_labor_force_2020", "Employed_2020", "Unemployed_2020", 
+    "Civilian_labor_force_2020", "Employed_2020", "Unemployed_2020",
     "Less than high school graduate, 2019-23", "High school graduate (or equivalency), 2019-23",
     "Some college or associate degree, 2019-23", "Bachelor's degree or higher, 2019-23",
-    "CENSUS_2020_POP", "Joseph Biden Votes, 2020", "Donald Trump Votes, 2020", 
+    "CENSUS_2020_POP", "Joseph Biden Votes, 2020", "Donald Trump Votes, 2020",
     "Jo Jorgensen Votes, 2020", "Green Party Votes, 2020", "Other Votes, 2020", "Total Votes, 2020"
 ];
 
@@ -37,7 +37,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
 
     let selectedVariable = variableSelect.property("value");
 
-    variableSelect.on("change", function() {
+    variableSelect.on("change", function () {
         selectedVariable = this.value;
         if (axisSelection.property("value") === "x") {
             scatterXVariable = selectedVariable;
@@ -47,12 +47,12 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         updateChart();
     });
 
-    orientationToggle.on("click", function() {
+    orientationToggle.on("click", function () {
         orientation = orientation === "upright" ? "sideways" : "upright";
         updateChart();
     });
 
-    axisSelection.on("change", function() {
+    axisSelection.on("change", function () {
         // Update scatterplot only if both x and y variables are selected
         if (scatterXVariable && scatterYVariable) {
             updateScatterplot();
@@ -86,13 +86,14 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .range(orientation === "upright" ? [innerHeight, 0] : [innerWidth, 0]);
 
         const xAxis = orientation === "upright" ? d3.axisBottom(xScale) : d3.axisLeft(xScale);
-        const yAxis = orientation === "upright" ? d3.axisLeft(yScale) : d3.axisRight(yScale);
+        const yAxis = orientation === "upright" ? d3.axisLeft(yScale) : d3.axisBottom(yScale);
 
         svg.append("g")
             .attr("transform", orientation === "upright" ? `translate(0,${innerHeight})` : `translate(0,0)`)
             .call(xAxis);
 
         svg.append("g")
+            .attr("transform", orientation === "upright" ? `translate(0,0)` : `translate(0,${innerHeight})`)
             .call(yAxis);
 
         const bars = svg.selectAll(".bar")
@@ -104,7 +105,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .attr("y", d => orientation === "upright" ? yScale(stateCounts.get(d)) : xScale(d))
             .attr("width", xScale.bandwidth())
             .attr("height", d => orientation === "upright" ? innerHeight - yScale(stateCounts.get(d)) : yScale(stateCounts.get(d)))
-            .on("mouseover", function(event, d) {
+            .on("mouseover", function (event, d) {
                 // Show tooltip on hover
                 const stateAbbr = stateAbbreviation[d];
                 const count = stateCounts.get(d);
@@ -116,7 +117,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
                     .style("text-anchor", "middle")
                     .text(`${stateAbbr}: ${count}`);
             })
-            .on("mouseout", function() {
+            .on("mouseout", function () {
                 // Hide tooltip on mouse out
                 d3.select(this).attr("fill", "steelblue");
                 svg.selectAll(".tooltip").remove();
@@ -187,7 +188,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
 
         svg.append("text")
             .attr("class", "axis-title")
-            .attr("transform", orientation === "upright" ? `translate(${-margin.left + 
+            .attr("transform", orientation === "upright" ? `translate(${-margin.left +
                 20},${innerHeight / 2}) rotate(-90)` : `translate(${innerWidth / 2},${innerHeight + margin.bottom - 10})`)
             .style("text-anchor", "middle")
             .text(useLogScale ? "Frequency (log scale)" : "Frequency");
