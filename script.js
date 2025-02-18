@@ -71,6 +71,78 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         }
     }
 
+    function drawHorizontalBarChart() {
+        const stateCounts = d3.rollup(data, v => v.length, d => d.state_po);
+        const states = Array.from(stateCounts.keys());
+        const counts = Array.from(stateCounts.values());
+
+        const xScale = d3.scaleBand()
+            .domain(states)
+            .range([0, innerHeight])
+            .padding(0.1);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(counts)])
+            .range([innerWidth, 0]);
+
+        const xAxis = d3.axisLeft(xScale);
+        const yAxis = d3.axisBottom(yScale);
+
+        svg.append("g")
+            .attr("transform",`translate(0,0)`)
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("transform", `translate(0,${innerHeight})`)
+            .call(yAxis);
+
+        const bars = svg.selectAll(".bar")
+            .data(states)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("x", d => 0)
+            .attr("y", d => xScale(d))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => yScale(stateCounts.get(d)))
+            .on("mouseover", function (event, d) {
+                // Show tooltip on hover
+                const stateAbbr = stateAbbreviation[d];
+                const count = stateCounts.get(d);
+                d3.select(this).attr("fill", "orange");
+                svg.append("text")
+                    .attr("class", "tooltip")
+                    .attr("x", yScale(count) / 2)
+                    .attr("y", xScale(d) + 15)
+                    .style("text-anchor", "middle")
+                    .text(`${stateAbbr}: ${count}`);
+            })
+            .on("mouseout", function () {
+                // Hide tooltip on mouse out
+                d3.select(this).attr("fill", "steelblue");
+                svg.selectAll(".tooltip").remove();
+            })
+            .transition()
+            .duration(500);
+
+        // Add x-axis label
+        svg.append("text")
+            .attr("class", "axis-title")
+            .attr("x", -innerHeight / 2)
+            .attr("y", -margin.left + 20)
+            .style("text-anchor", "middle")
+            .text(orientation === "upright" ? "State ID Code" : "Number of Counties");
+
+        // Add y-axis label
+        svg.append("text")
+            .attr("class", "axis-title")
+            .attr("transform", orientation === "upright" ? `rotate(-90)` : `rotate(0)`)
+            .attr("x", innerWidth / 2)
+            .attr("y", innerHeight + margin.bottom - 10)
+            .style("text-anchor", "middle")
+            .text("State ID Code");
+    }
+
     function drawBarChart(data) {
         const stateCounts = d3.rollup(data, v => v.length, d => d.state_po);
         const states = Array.from(stateCounts.keys());
@@ -244,5 +316,6 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .text(scatterYVariable);
     }
 
-    updateChart();
+    // updateChart();
+    drawHorizontalBarChart();
 });
