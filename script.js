@@ -15,6 +15,7 @@ const svg = d3.select("#chart")
 let orientation = "upright";
 let scatterXVariable = null;
 let scatterYVariable = null;
+let toggled = 1; // 1 for upright, 0 for sideways orientation
 
 // State abbreviation mapping
 const stateAbbreviation = {
@@ -44,12 +45,29 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         } else {
             scatterYVariable = selectedVariable;
         }
-        updateChart();
+        if (toggled === 1) {
+            updateChart();
+        }
+        if (selectedVariable === "state_po" && toggled === 0) {
+            drawHorizontalBarChart();
+        } else if (toggled === 0) {
+            drawHorizontalHistogram();
+        }
     });
 
     orientationToggle.on("click", function () {
         orientation = orientation === "upright" ? "sideways" : "upright";
-        updateChart();
+        if (toggled === 0) {
+            updateChart();
+            toggled = 1;
+        }
+        if (selectedVariable === "state_po" && toggled === 1) {
+            drawHorizontalBarChart();
+            toggled = 0;
+        } else if (toggled === 1){
+            drawHorizontalHistogram();
+            toggled = 0;
+        }
     });
 
     axisSelection.on("change", function () {
@@ -72,6 +90,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
     }
 
     function drawHorizontalBarChart() {
+        svg.selectAll("*").remove();
         const stateCounts = d3.rollup(data, v => v.length, d => d.state_po);
         const states = Array.from(stateCounts.keys());
         const counts = Array.from(stateCounts.values());
@@ -133,22 +152,93 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         // Add x-axis label
         svg.append("text")
             .attr("class", "axis-title")
-            .attr("x", -innerHeight / 2)
-            .attr("y", -margin.left + 20)
+            .attr("x", 0 + 315) 
+            .attr("y", 435) 
             .style("text-anchor", "middle")
             .text(orientation === "upright" ? "State ID Code" : "Number of Counties");
 
         // Add y-axis label
         svg.append("text")
             .attr("class", "axis-title")
-            .attr("transform", orientation === "upright" ? `rotate(-90)` : `rotate(0)`)
-            .attr("x", innerWidth / 2)
-            .attr("y", innerHeight + margin.bottom - 10)
+            .attr("transform", orientation === "upright" ? `rotate(0)` : `rotate(-90)`)
+            .attr("x", -200) 
+            .attr("y", -50) 
             .style("text-anchor", "middle")
-            .text("State ID Code");
+            .text(orientation === "upright" ? "Number of Counties" : "State ID Code");
+        
+        // Add title
+        svg.append("text")
+            .attr("class", "chart-title")
+            .attr("x", (width / 2) - 75)             
+            .attr("y", 0 - (margin.top / 2))
+            .attr("text-anchor", "middle")  
+            .style("font-size", "16px") 
+            .style("text-decoration", "underline")  
+            .text("Number of Counties by State");
+    }
+
+    function drawHorizontalHistogram() {
+        svg.selectAll("*").remove();
+        const values = data.map(d => +d[selectedVariable]).filter(d => !isNaN(d));
+        const bins = d3.bin()
+            .domain([d3.min(values), d3.max(values)])
+            .thresholds(10)(values);
+
+        const xScale = d3.scaleLinear()
+            .domain([d3.min(values), d3.max(values)])
+            .range([0, innerHeight]);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(bins, d => d.length)])
+            .range([innerWidth, 0]);
+
+        const yVisualScale = d3.scaleLinear()
+            .domain([d3.max(bins, d => d.length), 0])
+            .range([innerWidth, 0]);
+
+        const xAxis = d3.axisLeft(xScale);
+        const yAxis = d3.axisBottom(yVisualScale);
+
+        svg.append("g")
+            .attr("transform", `translate(0,0)`)
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("transform", `translate(0,${innerHeight})`)
+            .call(yAxis);
+
+        const bars = svg.selectAll(".bar")
+            .data(bins)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("x", d => xScale(d.x0) * -1 - 50) //From our perspective, this is the "y" position
+            .attr("y", 0) //From our perspective, this is the "x" position
+            .attr("width", xScale(d.x1) - xScale(d.x0)) //This is the "height" from our perspective
+            .attr("height", d => innerWidth - yScale(d.length)) // This is actually the "width" from our perspective
+            .attr("transform", `rotate(270)`)
+            .on("mouseover", function (event, d) {
+                // Show tooltip on hover
+                const count = d.length;
+                d3.select(this).attr("fill", "orange");
+                svg.append("text")
+                    .attr("class", "tooltip")
+                    .attr("x", yScale(count) / 2)
+                    .attr("y", xScale(d.x0) + 15)
+                    .style("text-anchor", "middle")
+                    .text(`Counties ${count}`);
+            })
+            .on("mouseout", function () {
+                // Hide tooltip on mouse out
+                d3.select(this).attr("fill", "steelblue");
+                svg.selectAll(".tooltip").remove();
+            })
+            .transition()
+            .duration(500);
     }
 
     function drawBarChart(data) {
+        svg.selectAll("*").remove();
         const stateCounts = d3.rollup(data, v => v.length, d => d.state_po);
         const states = Array.from(stateCounts.keys());
         const counts = Array.from(stateCounts.values());
@@ -218,6 +308,16 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .attr("y", orientation === "upright" ? -margin.left + 20 : innerHeight + margin.bottom - 10)
             .style("text-anchor", "middle")
             .text(orientation === "upright" ? "Number of Counties" : "State ID Code");
+        
+        // Add title
+        svg.append("text")
+            .attr("class", "chart-title")
+            .attr("x", (width / 2) - 75)             
+            .attr("y", 0 - (margin.top / 2))
+            .attr("text-anchor", "middle")  
+            .style("font-size", "16px") 
+            .style("text-decoration", "underline")  
+            .text("Number of Counties by State");
     }
 
     function drawHistogram(data, useLogScale) {
@@ -237,6 +337,8 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         const xAxis = orientation === "upright" ? d3.axisBottom(xScale) : d3.axisLeft(xScale);
         const yAxis = orientation === "upright" ? d3.axisLeft(yScale) : d3.axisRight(yScale);
 
+        // Append x-axis and y-axis
+
         svg.append("g")
             .attr("transform", orientation === "upright" ? `translate(0,${innerHeight})` : `translate(0,0)`)
             .call(xAxis);
@@ -244,6 +346,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         svg.append("g")
             .call(yAxis);
 
+        // Draw bars
         const bars = svg.selectAll(".bar")
             .data(bins)
             .enter()
@@ -253,6 +356,22 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .attr("y", d => orientation === "upright" ? yScale(d.length) : xScale(d.x0))
             .attr("width", d => orientation === "upright" ? xScale(d.x1) - xScale(d.x0) : yScale(d.length))
             .attr("height", d => orientation === "upright" ? innerHeight - yScale(d.length) : xScale(d.x1) - xScale(d.x0))
+            .on("mouseover", function (event, d) {
+                // Show tooltip on hover
+                const frequency = d.length;
+                d3.select(this).attr("fill", "orange");
+                svg.append("text")
+                    .attr("class", "tooltip")
+                    .attr("x", orientation === "upright" ? xScale(d.x0) + (xScale(d.x1) - xScale(d.x0)) / 2 : yScale(frequency) / 2)
+                    .attr("y", orientation === "upright" ? yScale(frequency) - 5 : xScale(d) + 15)
+                    .style("text-anchor", "middle")
+                    .text(`Number of Counties: ${frequency}`);
+            })
+            .on("mouseout", function () {
+                // Hide tooltip on mouse out
+                d3.select(this).attr("fill", "steelblue");
+                svg.selectAll(".tooltip").remove();
+            })
             .transition()
             .duration(500);
 
@@ -321,6 +440,6 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .text(scatterYVariable);
     }
 
-    // updateChart();
-    drawHorizontalBarChart();
+     updateChart();
+    //drawHorizontalBarChart();
 });
