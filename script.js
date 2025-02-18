@@ -16,6 +16,11 @@ let orientation = "upright";
 let scatterXVariable = null;
 let scatterYVariable = null;
 
+// State abbreviation mapping
+const stateAbbreviation = {
+    "1": "NY", "2": "PA", "3": "CO", "4": "ME", "5": "MA", "6": "CA", "7": "TX"
+};
+
 // Variables that should use a logarithmic scale due to high skewness
 const logScaleVariables = [
     "Civilian_labor_force_2020", "Employed_2020", "Unemployed_2020", 
@@ -99,20 +104,40 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .attr("y", d => orientation === "upright" ? yScale(stateCounts.get(d)) : xScale(d))
             .attr("width", xScale.bandwidth())
             .attr("height", d => orientation === "upright" ? innerHeight - yScale(stateCounts.get(d)) : yScale(stateCounts.get(d)))
+            .on("mouseover", function(event, d) {
+                // Show tooltip on hover
+                const stateAbbr = stateAbbreviation[d];
+                const count = stateCounts.get(d);
+                d3.select(this).attr("fill", "orange");
+                svg.append("text")
+                    .attr("class", "tooltip")
+                    .attr("x", orientation === "upright" ? xScale(d) + xScale.bandwidth() / 2 : yScale(count) / 2)
+                    .attr("y", orientation === "upright" ? yScale(count) - 5 : xScale(d) + 15)
+                    .style("text-anchor", "middle")
+                    .text(`${stateAbbr}: ${count}`);
+            })
+            .on("mouseout", function() {
+                // Hide tooltip on mouse out
+                d3.select(this).attr("fill", "steelblue");
+                svg.selectAll(".tooltip").remove();
+            })
             .transition()
             .duration(500);
 
+        // Add x-axis label
         svg.append("text")
             .attr("class", "axis-title")
-            .attr("x", innerWidth / 2)
-            .attr("y", innerHeight + margin.bottom - 10)
+            .attr("x", orientation === "upright" ? innerWidth / 2 : -innerHeight / 2)
+            .attr("y", orientation === "upright" ? innerHeight + margin.bottom - 10 : -margin.left + 20)
             .style("text-anchor", "middle")
             .text(orientation === "upright" ? "State ID Code" : "Number of Counties");
 
+        // Add y-axis label
         svg.append("text")
             .attr("class", "axis-title")
-            .attr("transform", orientation === "upright" ? `translate(${-margin.left + 20},${innerHeight / 2}) rotate(-90)` : 
-                `translate(${innerWidth / 2},${innerHeight + margin.bottom - 10})`)
+            .attr("transform", orientation === "upright" ? `rotate(-90)` : `rotate(0)`)
+            .attr("x", orientation === "upright" ? -innerHeight / 2 : innerWidth / 2)
+            .attr("y", orientation === "upright" ? -margin.left + 20 : innerHeight + margin.bottom - 10)
             .style("text-anchor", "middle")
             .text(orientation === "upright" ? "Number of Counties" : "State ID Code");
     }
