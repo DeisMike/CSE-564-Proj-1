@@ -5,6 +5,17 @@ const margin = { top: 50, right: 100, bottom: 70, left: 100 };
 const innerWidth = width - margin.left - margin.right;
 const innerHeight = height - margin.top - margin.bottom;
 
+const svg_map = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+const image = svg_map.append("image")
+    .attr("xlink:href", "US_map.jpg")
+    .attr("width", 700)
+    .attr("height", 400)
+    .attr("x", 800)
+    .attr("y", -500);
+
 const svg = d3.select("#chart")
     .append("svg")
     .attr("width", width)
@@ -375,6 +386,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .transition()
             .duration(500);
 
+        // Add x-axis label
         svg.append("text")
             .attr("class", "axis-title")
             .attr("x", innerWidth / 2)
@@ -382,12 +394,23 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .style("text-anchor", "middle")
             .text(selectedVariable);
 
+        // Add y-axis label
         svg.append("text")
             .attr("class", "axis-title")
             .attr("transform", orientation === "upright" ? `translate(${-margin.left +
                 20},${innerHeight / 2}) rotate(-90)` : `translate(${innerWidth / 2},${innerHeight + margin.bottom - 10})`)
             .style("text-anchor", "middle")
             .text(useLogScale ? "Frequency (log scale)" : "Frequency");
+
+        // Add title
+        svg.append("text")
+            .attr("class", "chart-title")
+            .attr("x", (width / 2) - 75)             
+            .attr("y", 0 - (margin.top / 2))
+            .attr("text-anchor", "middle")  
+            .style("font-size", "16px") 
+            .style("text-decoration", "underline")  
+            .text(useLogScale ? `Total ${selectedVariable} by County` : (selectedVariable === "Unemployment_rate_2020" ? "2020 Unemployment Rates by County" : "2022 Median Household Incomes by County"));
     }
 
     function updateScatterplot() {
