@@ -85,11 +85,15 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .domain([0, d3.max(counts)])
             .range([innerWidth, 0]);
 
+        const yVisualScale = d3.scaleLinear()
+            .domain([d3.max(counts), 0])
+            .range([innerWidth, 0]);
+
         const xAxis = d3.axisLeft(xScale);
-        const yAxis = d3.axisBottom(yScale);
+        const yAxis = d3.axisBottom(yVisualScale);
 
         svg.append("g")
-            .attr("transform",`translate(0,0)`)
+            .attr("transform", `translate(0,0)`)
             .call(xAxis);
 
         svg.append("g")
@@ -103,8 +107,8 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .attr("class", "bar")
             .attr("x", d => xScale(d))
             .attr("y", d => xScale(d))
-            .attr("width", xScale.bandwidth())
-            .attr("height", d => innerWidth - yScale(stateCounts.get(d)))
+            .attr("width", xScale.bandwidth()) //This is the "width" from our perspective
+            .attr("height", d => innerWidth - yScale(stateCounts.get(d))) // This is actually the "width" from our perspective
             .attr("transform", `rotate(270)`)
             .on("mouseover", function (event, d) {
                 // Show tooltip on hover
