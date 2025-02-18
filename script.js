@@ -105,9 +105,9 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .enter()
             .append("rect")
             .attr("class", "bar")
-            .attr("x", d => xScale(d))
+            .attr("x", d => xScale(d) * -1 - 50)
             .attr("y", d => xScale(d))
-            .attr("width", xScale.bandwidth()) //This is the "width" from our perspective
+            .attr("width", xScale.bandwidth()) //This is the "height" from our perspective
             .attr("height", d => innerWidth - yScale(stateCounts.get(d))) // This is actually the "width" from our perspective
             .attr("transform", `rotate(270)`)
             .on("mouseover", function (event, d) {
