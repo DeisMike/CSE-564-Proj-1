@@ -101,10 +101,11 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .enter()
             .append("rect")
             .attr("class", "bar")
-            .attr("x", d => 0)
+            .attr("x", d => xScale(d))
             .attr("y", d => xScale(d))
             .attr("width", xScale.bandwidth())
-            .attr("height", d => yScale(stateCounts.get(d)))
+            .attr("height", d => innerWidth - yScale(stateCounts.get(d)))
+            .attr("transform", `rotate(270)`)
             .on("mouseover", function (event, d) {
                 // Show tooltip on hover
                 const stateAbbr = stateAbbreviation[d];
