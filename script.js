@@ -62,7 +62,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         if (selectedVariable === "state_po" && toggled === 0) {
             drawHorizontalBarChart();
         } else if (toggled === 0) {
-            drawHorizontalHistogram();
+            drawHorizontalHistogram(logScaleVariables.includes(selectedVariable));
         }
     });
 
@@ -71,14 +71,14 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         if (selectedVariable === "state_po" && toggled === 1) {
             drawHorizontalBarChart();
             toggled = 0;
-        } else if (toggled === 1){
-            drawHorizontalHistogram();
+        } else if (toggled === 1) {
+            drawHorizontalHistogram(logScaleVariables.includes(selectedVariable));
             toggled = 0;
         } else {
             updateChart();
             toggled = 1;
         }
-        
+
     });
 
     axisSelection.on("change", function () {
@@ -93,12 +93,12 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
 
         if (selectedVariable === "state_po") {
             drawBarChart(data);
-        } else if (logScaleVariables.includes(selectedVariable)) {
-            drawHistogram(data, true); // Use log scale
-        } else {
-            drawHistogram(data, false); // Use linear scale
+        }
+        else {
+            drawHistogram(logScaleVariables.includes(selectedVariable)); // Use log based on if it's a log variable scale
         }
     }
+
 
     //#region Bar Chart
     function drawHorizontalBarChart() {
@@ -164,8 +164,8 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         // Add x-axis label
         svg.append("text")
             .attr("class", "axis-title")
-            .attr("x", 0 + 315) 
-            .attr("y", 435) 
+            .attr("x", 0 + 315)
+            .attr("y", 435)
             .style("text-anchor", "middle")
             .text(orientation === "upright" ? "State ID Code" : "Number of Counties");
 
@@ -173,19 +173,19 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         svg.append("text")
             .attr("class", "axis-title")
             .attr("transform", orientation === "upright" ? `rotate(0)` : `rotate(-90)`)
-            .attr("x", -200) 
-            .attr("y", -50) 
+            .attr("x", -200)
+            .attr("y", -50)
             .style("text-anchor", "middle")
             .text(orientation === "upright" ? "Number of Counties" : "State ID Code");
-        
+
         // Add title
         svg.append("text")
             .attr("class", "chart-title")
-            .attr("x", (width / 2) - 75)             
+            .attr("x", (width / 2) - 75)
             .attr("y", 0 - (margin.top / 2))
-            .attr("text-anchor", "middle")  
-            .style("font-size", "16px") 
-            .style("text-decoration", "underline")  
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("text-decoration", "underline")
             .text("Number of Counties by State");
     }
 
@@ -260,21 +260,21 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .attr("y", orientation === "upright" ? -margin.left + 20 : innerHeight + margin.bottom - 10)
             .style("text-anchor", "middle")
             .text(orientation === "upright" ? "Number of Counties" : "State ID Code");
-        
+
         // Add title
         svg.append("text")
             .attr("class", "chart-title")
-            .attr("x", (width / 2) - 75)             
+            .attr("x", (width / 2) - 75)
             .attr("y", 0 - (margin.top / 2))
-            .attr("text-anchor", "middle")  
-            .style("font-size", "16px") 
-            .style("text-decoration", "underline")  
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("text-decoration", "underline")
             .text("Number of Counties by State");
     }
     //#endregion
 
     //#region Histogram
-    function drawHistogram(data, useLogScale) {
+    function drawHistogram(useLogScale) {
         svg.selectAll("*").remove(); // Clear chart before redrawing
         const values = data.map(d => +d[selectedVariable]).filter(d => !isNaN(d));
         const bins = d3.bin()
@@ -349,15 +349,15 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         // Add title
         svg.append("text")
             .attr("class", "chart-title")
-            .attr("x", (width / 2) - 75)             
+            .attr("x", (width / 2) - 75)
             .attr("y", 0 - (margin.top / 2))
-            .attr("text-anchor", "middle")  
-            .style("font-size", "16px") 
-            .style("text-decoration", "underline")  
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("text-decoration", "underline")
             .text(useLogScale ? `Total ${selectedVariable} by County` : (selectedVariable === "Unemployment_rate_2020" ? "2020 Unemployment Rates by County" : "2022 Median Household Incomes by County"));
     }
 
-    function drawHorizontalHistogram() {
+    function drawHorizontalHistogram(useLogScale) {
         svg.selectAll("*").remove();
         const values = data.map(d => +d[selectedVariable]).filter(d => !isNaN(d));
         const bins = d3.bin()
@@ -415,6 +415,32 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             })
             .transition()
             .duration(500);
+
+        // Add x-axis label
+        svg.append("text")
+            .attr("class", "axis-title")
+            .attr("x", innerWidth / 2)
+            .attr("y", innerHeight + margin.bottom - 10)
+            .style("text-anchor", "middle")
+            .text(selectedVariable);
+
+        // Add y-axis label
+        svg.append("text")
+            .attr("class", "axis-title")
+            .attr("transform", orientation === "upright" ? `translate(${-margin.left +
+                20},${innerHeight / 2}) rotate(-90)` : `translate(${innerWidth / 2},${innerHeight + margin.bottom - 10})`)
+            .style("text-anchor", "middle")
+            .text(useLogScale ? "Frequency (log scale)" : "Frequency");
+
+        // Add title
+        svg.append("text")
+            .attr("class", "chart-title")
+            .attr("x", (width / 2) - 75)
+            .attr("y", 0 - (margin.top / 2))
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("text-decoration", "underline")
+            .text(useLogScale ? `Total ${selectedVariable} by County` : (selectedVariable === "Unemployment_rate_2020" ? "2020 Unemployment Rates by County" : "2022 Median Household Incomes by County"));
     }
     //#endregion
 
@@ -470,5 +496,5 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
     }
     //#endregion
 
-     updateChart();
+    updateChart();
 });
