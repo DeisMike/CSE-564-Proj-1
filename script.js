@@ -392,7 +392,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .enter()
             .append("rect")
             .attr("class", "bar")
-            .attr("x", d => xScale(d.x0) * -1 - 50) //From our perspective, this is the "y" position
+            .attr("x", d => xScale(d.x0) * -1 - (xScale(d.x1) - xScale(d.x0) * 3) - xScale(d.x1) - xScale(d.x0) + xScale(d.x1) - xScale(d.x0)) //From our perspective, this is the "y" position.  This math can definitely be simplified.
             .attr("y", 0) //From our perspective, this is the "x" position
             .attr("width", d => xScale(d.x1) - xScale(d.x0)) //This is the "height" from our perspective
             .attr("height", d => innerWidth - yScale(d.length)) // This is actually the "width" from our perspective
