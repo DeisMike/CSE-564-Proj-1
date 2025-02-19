@@ -416,19 +416,18 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .transition()
             .duration(500);
 
-        // Add x-axis label
-        svg.append("text")
-            .attr("class", "axis-title")
-            .attr("x", innerWidth / 2)
-            .attr("y", innerHeight + margin.bottom - 10)
-            .style("text-anchor", "middle")
-            .text(selectedVariable);
-
         // Add y-axis label
         svg.append("text")
             .attr("class", "axis-title")
-            .attr("transform", orientation === "upright" ? `translate(${-margin.left +
-                20},${innerHeight / 2}) rotate(-90)` : `translate(${innerWidth / 2},${innerHeight + margin.bottom - 10})`)
+            .attr("transform", `translate(${-margin.left +
+                20},${innerHeight / 2}) rotate(-90)`)
+            .style("text-anchor", "middle")
+            .text(selectedVariable);
+
+        // Add x-axis label
+        svg.append("text")
+            .attr("class", "axis-title")
+            .attr("transform", `translate(${innerWidth / 2},${innerHeight + margin.bottom - 10})`)
             .style("text-anchor", "middle")
             .text(useLogScale ? "Frequency (log scale)" : "Frequency");
 
