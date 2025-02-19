@@ -418,6 +418,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
     }
     //#endregion
 
+    //#region Scatterplot
     function updateScatterplot() {
         if (!scatterXVariable || !scatterYVariable) return;
 
@@ -467,7 +468,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .style("text-anchor", "middle")
             .text(scatterYVariable);
     }
+    //#endregion
 
      updateChart();
-    //drawHorizontalBarChart();
 });
