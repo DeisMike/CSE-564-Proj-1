@@ -68,17 +68,17 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
 
     orientationToggle.on("click", function () {
         orientation = orientation === "upright" ? "sideways" : "upright";
-        if (toggled === 0) {
-            updateChart();
-            toggled = 1;
-        }
         if (selectedVariable === "state_po" && toggled === 1) {
             drawHorizontalBarChart();
             toggled = 0;
         } else if (toggled === 1){
             drawHorizontalHistogram();
             toggled = 0;
+        } else {
+            updateChart();
+            toggled = 1;
         }
+        
     });
 
     axisSelection.on("change", function () {
