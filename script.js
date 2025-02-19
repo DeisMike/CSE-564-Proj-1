@@ -100,6 +100,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
         }
     }
 
+    //#region Bar Chart
     function drawHorizontalBarChart() {
         svg.selectAll("*").remove();
         const stateCounts = d3.rollup(data, v => v.length, d => d.state_po);
@@ -188,66 +189,6 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .text("Number of Counties by State");
     }
 
-    function drawHorizontalHistogram() {
-        svg.selectAll("*").remove();
-        const values = data.map(d => +d[selectedVariable]).filter(d => !isNaN(d));
-        const bins = d3.bin()
-            .domain([d3.min(values), d3.max(values)])
-            .thresholds(10)(values);
-
-        const xScale = d3.scaleLinear()
-            .domain([d3.min(values), d3.max(values)])
-            .range([0, innerHeight]);
-
-        const yScale = d3.scaleLinear()
-            .domain([0, d3.max(bins, d => d.length)])
-            .range([innerWidth, 0]);
-
-        const yVisualScale = d3.scaleLinear()
-            .domain([d3.max(bins, d => d.length), 0])
-            .range([innerWidth, 0]);
-
-        const xAxis = d3.axisLeft(xScale);
-        const yAxis = d3.axisBottom(yVisualScale);
-
-        svg.append("g")
-            .attr("transform", `translate(0,0)`)
-            .call(xAxis);
-
-        svg.append("g")
-            .attr("transform", `translate(0,${innerHeight})`)
-            .call(yAxis);
-
-        const bars = svg.selectAll(".bar")
-            .data(bins)
-            .enter()
-            .append("rect")
-            .attr("class", "bar")
-            .attr("x", d => xScale(d.x0) * -1 - 50) //From our perspective, this is the "y" position
-            .attr("y", 0) //From our perspective, this is the "x" position
-            .attr("width", d => xScale(d.x1) - xScale(d.x0)) //This is the "height" from our perspective
-            .attr("height", d => innerWidth - yScale(d.length)) // This is actually the "width" from our perspective
-            .attr("transform", `rotate(270)`)
-            .on("mouseover", function (event, d) {
-                // Show tooltip on hover
-                const count = d.length;
-                d3.select(this).attr("fill", "orange");
-                svg.append("text")
-                    .attr("class", "tooltip")
-                    .attr("x", yScale(count) / 2)
-                    .attr("y", xScale(d.x0) + 15)
-                    .style("text-anchor", "middle")
-                    .text(`Counties ${count}`);
-            })
-            .on("mouseout", function () {
-                // Hide tooltip on mouse out
-                d3.select(this).attr("fill", "steelblue");
-                svg.selectAll(".tooltip").remove();
-            })
-            .transition()
-            .duration(500);
-    }
-
     function drawBarChart(data) {
         svg.selectAll("*").remove();
         const stateCounts = d3.rollup(data, v => v.length, d => d.state_po);
@@ -330,7 +271,9 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .style("text-decoration", "underline")  
             .text("Number of Counties by State");
     }
+    //#endregion
 
+    //#region Histogram
     function drawHistogram(data, useLogScale) {
         svg.selectAll("*").remove(); // Clear chart before redrawing
         const values = data.map(d => +d[selectedVariable]).filter(d => !isNaN(d));
@@ -413,6 +356,67 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .style("text-decoration", "underline")  
             .text(useLogScale ? `Total ${selectedVariable} by County` : (selectedVariable === "Unemployment_rate_2020" ? "2020 Unemployment Rates by County" : "2022 Median Household Incomes by County"));
     }
+
+    function drawHorizontalHistogram() {
+        svg.selectAll("*").remove();
+        const values = data.map(d => +d[selectedVariable]).filter(d => !isNaN(d));
+        const bins = d3.bin()
+            .domain([d3.min(values), d3.max(values)])
+            .thresholds(10)(values);
+
+        const xScale = d3.scaleLinear()
+            .domain([d3.min(values), d3.max(values)])
+            .range([0, innerHeight]);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(bins, d => d.length)])
+            .range([innerWidth, 0]);
+
+        const yVisualScale = d3.scaleLinear()
+            .domain([d3.max(bins, d => d.length), 0])
+            .range([innerWidth, 0]);
+
+        const xAxis = d3.axisLeft(xScale);
+        const yAxis = d3.axisBottom(yVisualScale);
+
+        svg.append("g")
+            .attr("transform", `translate(0,0)`)
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("transform", `translate(0,${innerHeight})`)
+            .call(yAxis);
+
+        const bars = svg.selectAll(".bar")
+            .data(bins)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("x", d => xScale(d.x0) * -1 - 50) //From our perspective, this is the "y" position
+            .attr("y", 0) //From our perspective, this is the "x" position
+            .attr("width", d => xScale(d.x1) - xScale(d.x0)) //This is the "height" from our perspective
+            .attr("height", d => innerWidth - yScale(d.length)) // This is actually the "width" from our perspective
+            .attr("transform", `rotate(270)`)
+            .on("mouseover", function (event, d) {
+                // Show tooltip on hover
+                const count = d.length;
+                d3.select(this).attr("fill", "orange");
+                svg.append("text")
+                    .attr("class", "tooltip")
+                    .attr("x", yScale(count) / 2)
+                    .attr("y", xScale(d.x0) + 15)
+                    .style("text-anchor", "middle")
+                    .text(`Counties ${count}`);
+            })
+            .on("mouseout", function () {
+                // Hide tooltip on mouse out
+                d3.select(this).attr("fill", "steelblue");
+                svg.selectAll(".tooltip").remove();
+            })
+            .transition()
+            .duration(500);
+    }
+    //#endregion
 
     function updateScatterplot() {
         if (!scatterXVariable || !scatterYVariable) return;
