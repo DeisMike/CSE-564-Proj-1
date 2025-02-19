@@ -373,7 +373,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .range([innerWidth, 0]);
 
         const yVisualScale = useLogScale ? d3.scaleLog() : d3.scaleLinear();
-            yVisualScale.domain([1, d3.max(bins, d => d.length)])
+            yVisualScale.domain([d3.max(bins, d => d.length), 1])
             .range([innerWidth, 0]);
 
         const xAxis = d3.axisLeft(xScale);
