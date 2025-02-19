@@ -225,7 +225,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .attr("class", "bar")
             .attr("x", d => xScale(d.x0) * -1 - 50) //From our perspective, this is the "y" position
             .attr("y", 0) //From our perspective, this is the "x" position
-            .attr("width", xScale(d.x1) - xScale(d.x0)) //This is the "height" from our perspective
+            .attr("width", d => xScale(d.x1) - xScale(d.x0)) //This is the "height" from our perspective
             .attr("height", d => innerWidth - yScale(d.length)) // This is actually the "width" from our perspective
             .attr("transform", `rotate(270)`)
             .on("mouseover", function (event, d) {
@@ -332,6 +332,7 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
     }
 
     function drawHistogram(data, useLogScale) {
+        svg.selectAll("*").remove(); // Clear chart before redrawing
         const values = data.map(d => +d[selectedVariable]).filter(d => !isNaN(d));
         const bins = d3.bin()
             .domain([d3.min(values), d3.max(values)])
