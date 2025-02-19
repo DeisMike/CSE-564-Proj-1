@@ -368,12 +368,12 @@ d3.csv("FINAL CSE 564 Proj 1 Dataset.csv").then(data => {
             .domain([d3.min(values), d3.max(values)])
             .range([0, innerHeight]);
 
-        const yScale = d3.scaleLinear()
-            .domain([0, d3.max(bins, d => d.length)])
+        const yScale = useLogScale ? d3.scaleLog() : d3.scaleLinear();
+        yScale.domain([1, d3.max(bins, d => d.length)]) // Log scale starts at 1
             .range([innerWidth, 0]);
 
-        const yVisualScale = d3.scaleLinear()
-            .domain([d3.max(bins, d => d.length), 0])
+        const yVisualScale = useLogScale ? d3.scaleLog() : d3.scaleLinear();
+            yVisualScale.domain([1, d3.max(bins, d => d.length)])
             .range([innerWidth, 0]);
 
         const xAxis = d3.axisLeft(xScale);
